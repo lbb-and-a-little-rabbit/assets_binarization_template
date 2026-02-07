@@ -1,5 +1,4 @@
 #pragma once
-
 #include <SFML/Graphics.hpp>
 #include <vector>
 
@@ -9,26 +8,34 @@ public:
 
     void setStand();
     void setAttack();
+    void setWalk();
 
     void update(float dt);
     void draw(sf::RenderWindow& window);
+
+    void move(float dx);
+    void setDirection(int dir);
+    void setPosition(const sf::Vector2f& pos);
 
     bool isAttackFinished() const;
 
 private:
     void loadAssets();
+    void applyFrame();   // 统一换帧函数
 
 private:
-    // 注意：texture 必须在 sprite 之前声明（构造顺序）
     sf::Texture dummyTexture;
     sf::Sprite  sprite;
 
     std::vector<sf::Texture> standFrames;
     std::vector<sf::Texture> attackFrames;
+    std::vector<sf::Texture> walkFrames;
 
     const std::vector<sf::Texture>* currentFrames = nullptr;
 
     int currentFrame = 0;
+    int direction = 1;
+
     float timer = 0.f;
-    float frameDuration = 0.08f; // 每帧时长
+    float frameDuration = 0.08f;
 };

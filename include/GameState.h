@@ -2,5 +2,6 @@
 
 enum GameState{
     Stand,
-    Attack
+    Attack,
+    Walk
 };

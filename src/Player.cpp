@@ -19,6 +19,10 @@ Player::Player()
 {
     loadAssets();
     setStand();
+
+    // 🔥 只设置一次 origin（统一中心）
+    auto bounds = sprite.getLocalBounds();
+    sprite.setOrigin(bounds.size / 2.f);
 }
 
 void Player::loadAssets()
@@ -59,6 +63,30 @@ void Player::loadAssets()
     attackFrames.push_back(loadTex(ASSET_START_attack_attack0022, ASSET_END_attack_attack0022));
     attackFrames.push_back(loadTex(ASSET_START_attack_attack0023, ASSET_END_attack_attack0023));
     attackFrames.push_back(loadTex(ASSET_START_attack_attack0024, ASSET_END_attack_attack0024));
+
+    walkFrames.clear();
+    walkFrames.reserve(11);
+    walkFrames.push_back(loadTex(ASSET_START_walk_walk0001, ASSET_END_walk_walk0001));
+    walkFrames.push_back(loadTex(ASSET_START_walk_walk0002, ASSET_END_walk_walk0002));
+    walkFrames.push_back(loadTex(ASSET_START_walk_walk0003, ASSET_END_walk_walk0003));
+    walkFrames.push_back(loadTex(ASSET_START_walk_walk0004, ASSET_END_walk_walk0004));
+    walkFrames.push_back(loadTex(ASSET_START_walk_walk0005, ASSET_END_walk_walk0005));
+    walkFrames.push_back(loadTex(ASSET_START_walk_walk0006, ASSET_END_walk_walk0006));
+    walkFrames.push_back(loadTex(ASSET_START_walk_walk0007, ASSET_END_walk_walk0007));
+    walkFrames.push_back(loadTex(ASSET_START_walk_walk0008, ASSET_END_walk_walk0008));
+    walkFrames.push_back(loadTex(ASSET_START_walk_walk0009, ASSET_END_walk_walk0009));
+    walkFrames.push_back(loadTex(ASSET_START_walk_walk0010, ASSET_END_walk_walk0010));
+    walkFrames.push_back(loadTex(ASSET_START_walk_walk0011, ASSET_END_walk_walk0011));
+}
+
+void Player::applyFrame()
+{
+    sprite.setTexture((*currentFrames)[currentFrame], true);
+
+    // 保持翻转
+    sprite.setScale(direction == -1 ?
+        sf::Vector2f{-1.f, 1.f} :
+        sf::Vector2f{1.f, 1.f});
 }
 
 void Player::setStand()
@@ -66,8 +94,7 @@ void Player::setStand()
     currentFrames = &standFrames;
     currentFrame = 0;
     timer = 0.f;
-    if (!currentFrames->empty())
-        sprite.setTexture((*currentFrames)[0], true);
+    applyFrame();
 }
 
 void Player::setAttack()
@@ -75,8 +102,15 @@ void Player::setAttack()
     currentFrames = &attackFrames;
     currentFrame = 0;
     timer = 0.f;
-    if (!currentFrames->empty())
-        sprite.setTexture((*currentFrames)[0], true);
+    applyFrame();
+}
+
+void Player::setWalk()
+{
+    currentFrames = &walkFrames;
+    currentFrame = 0;
+    timer = 0.f;
+    applyFrame();
 }
 
 bool Player::isAttackFinished() const
@@ -94,15 +128,40 @@ void Player::update(float dt)
     timer = 0.f;
 
     currentFrame++;
-    if (currentFrame >= static_cast<int>(currentFrames->size()))
+
+    if (currentFrames == &attackFrames)
     {
-        currentFrame = static_cast<int>(currentFrames->size()) - 1;
+        if (currentFrame >= static_cast<int>(currentFrames->size()))
+            currentFrame = static_cast<int>(currentFrames->size()) - 1;
+    }
+    else
+    {
+        if (currentFrame >= static_cast<int>(currentFrames->size()))
+            currentFrame = 0;
     }
 
-    sprite.setTexture((*currentFrames)[currentFrame], true);
+    applyFrame();
 }
 
 void Player::draw(sf::RenderWindow& window)
 {
     window.draw(sprite);
+}
+
+void Player::move(float dx)
+{
+    sprite.move({dx, 0.f});
+}
+
+void Player::setDirection(int dir)
+{
+    direction = dir;
+    sprite.setScale(direction == -1 ?
+        sf::Vector2f{-1.f, 1.f} :
+        sf::Vector2f{1.f, 1.f});
+}
+
+void Player::setPosition(const sf::Vector2f& pos)
+{
+    sprite.setPosition(pos);
 }
